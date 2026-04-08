@@ -57,6 +57,8 @@ namespace Whisper.Samples
         {
             if (!microphoneRecord.IsRecording)
             {
+                whisper.initialPrompt = "Cube, Sphere, Cylinder, Capsule, Spawn, Create, Delete, Remove, Red, Blue, Green, Metal, Wood, Search Wikipedia, Information";
+
                 microphoneRecord.StartRecord();
                 buttonText.text = "Stop";
             }
@@ -89,6 +91,12 @@ namespace Whisper.Samples
             
             outputText.text = text;
             UiUtils.ScrollDown(scroll);
+
+            if (AppManager.Instance != null)
+            {
+                AppManager.Instance.ProcessVoiceCommand(res.Result);
+            }
+       
         }
         
         private void OnLanguageChanged(int ind)
