@@ -1108,7 +1108,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   logLevel: 1
-  modelPath: ggml-tiny.en.bin
+  modelPath: ggml-base.en.bin
   isModelPathInStreamingAssets: 1
   initOnAwake: 1
   useGpu: 1
@@ -3251,7 +3251,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 967652833}
   m_HandleRect: {fileID: 967652832}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -4495,6 +4495,7 @@ GameObject:
   - component: {fileID: 1828600390}
   - component: {fileID: 1828600389}
   - component: {fileID: 1828600388}
+  - component: {fileID: 1828600391}
   m_Layer: 0
   m_Name: ----SYSTEM----
   m_TagString: Untagged
@@ -4531,6 +4532,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AppManager
   spawner: {fileID: 1828600388}
+  wikiApi: {fileID: 1828600391}
 --- !u!4 &1828600390
 Transform:
   m_ObjectHideFlags: 0
@@ -4546,6 +4548,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1828600391
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1828600387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9be9855c0f73cfc4b914e3f1846e0933, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WikiAPI
 --- !u!1 &2022822247
 GameObject:
   m_ObjectHideFlags: 0
