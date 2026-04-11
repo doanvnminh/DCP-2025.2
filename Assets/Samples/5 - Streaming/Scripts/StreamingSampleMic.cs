@@ -11,7 +11,8 @@ namespace Whisper.Samples
     {
         public WhisperManager whisper;
         public MicrophoneRecord microphoneRecord;
-    
+        public SpeechActionController controller;
+
         [Header("UI")] 
         public Button button;
         public Text buttonText;
@@ -53,6 +54,12 @@ namespace Whisper.Samples
         {
             text.text = result;
             UiUtils.ScrollDown(scroll);
+            Debug.Log(result);
+
+            if (controller != null)
+            {
+                controller.HandleSpeech(result);
+            }
         }
         
         private void OnSegmentUpdated(WhisperResult segment)
