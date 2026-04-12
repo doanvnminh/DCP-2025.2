@@ -57,7 +57,7 @@ namespace Whisper.Samples
         {
             if (!microphoneRecord.IsRecording)
             {
-                whisper.initialPrompt = "Cube, Sphere, Cylinder, Capsule, Spawn, Create, Delete, Remove, Red, Blue, Green, Metal, Wood, Search Wikipedia, Information";
+                whisper.initialPrompt = "Cube, Sphere, Cylinder, Capsule, Spawn, Create, Make,Delete, Remove, Red, Blue, Green, Metal, Wood, Search Wikipedia, Information";
 
                 microphoneRecord.StartRecord();
                 buttonText.text = "Stop";
