@@ -20,8 +20,6 @@ public class ObjectSpawner : MonoBehaviour
     // Note: If api.poly.pizza is down, this will still fail, but we will catch the error gracefully.
     private string searchEndpoint = "https://api.poly.pizza/v1.1/search/";
 
-    [Header("Default Material (For Raw Meshes)")]
-    public Material defaultMaterial;
 
     public void SpawnShape(string shapeName)
     {
@@ -115,67 +113,56 @@ public class ObjectSpawner : MonoBehaviour
                 var gltf = new GltfImport();
                 bool success = await gltf.LoadGltfBinary(modelBytes);
 
-                if (success && gltf.GetMeshes() != null && gltf.GetMeshes().Length > 0)
+                if (success)
                 {
-                    // 1. Grab the raw geometry
-                    Mesh rawGeometry = gltf.GetMeshes()[0];
-
-                    // ==========================================
-                    // MAGIC FIX 1: AUTO-CENTER THE PIVOT POINT
-                    // ==========================================
-                    // We look at the bounding box, find the exact visual center, 
-                    // and offset every single vertex so the center is exactly at (0,0,0).
-                    Vector3[] vertices = rawGeometry.vertices;
-                    Vector3 meshCenter = rawGeometry.bounds.center;
-
-                    for (int i = 0; i < vertices.Length; i++)
-                    {
-                        vertices[i] -= meshCenter;
-                    }
-
-                    rawGeometry.vertices = vertices;
-                    rawGeometry.RecalculateBounds(); // Tell Unity we moved the geometry!
-
-
-                    // ==========================================
-                    // MAGIC FIX 2: AUTO-SCALE TO A STANDARD SIZE
-                    // ==========================================
-                    // We find the longest side of the model, and calculate exactly 
-                    // how much we need to multiply it by to make it exactly 1.5 meters big.
-                    float maxSide = Mathf.Max(rawGeometry.bounds.size.x, rawGeometry.bounds.size.y, rawGeometry.bounds.size.z);
-                    float targetSizeInMeters = 1.5f; // Change this if you want bigger/smaller objects!
-                    float scaleFactor = targetSizeInMeters / maxSide;
-
-
-                    // 2. Create the GameObject at your exact spawn point
                     GameObject newObject = new GameObject("API_Spawned_" + shapeName);
                     newObject.transform.position = spawnPoint.position;
 
-                    // Apply our calculated scale factor so it isn't tiny!
-                    newObject.transform.localScale = Vector3.one * scaleFactor;
+                    // This automatically creates child objects with MeshFilters and MeshRenderers applied.
+                    bool instanced = await gltf.InstantiateMainSceneAsync(newObject.transform);
 
-                    // 3. Attach the fixed Mesh
-                    MeshFilter filter = newObject.AddComponent<MeshFilter>();
-                    filter.mesh = rawGeometry;
+                    if (instanced)
+                    {
+                        // Because GLTFast might create multiple child meshes, we measure the combined size
+                        Bounds combinedBounds = new Bounds(newObject.transform.position, Vector3.zero);
+                        Renderer[] renderers = newObject.GetComponentsInChildren<Renderer>();
 
-                    MeshRenderer renderer = newObject.AddComponent<MeshRenderer>();
-                    if (defaultMaterial != null) renderer.material = defaultMaterial;
+                        foreach (Renderer r in renderers)
+                        {
+                            combinedBounds.Encapsulate(r.bounds);
+                        }
 
-                    // 4. Setup Physics
-                    MeshCollider collider = newObject.AddComponent<MeshCollider>();
-                    collider.sharedMesh = rawGeometry;
-                    collider.convex = true;
+                        float maxSide = Mathf.Max(combinedBounds.size.x, combinedBounds.size.y, combinedBounds.size.z);
+                        float targetSizeInMeters = 1.5f;
 
-                    Rigidbody rb = newObject.AddComponent<Rigidbody>();
+                        if (maxSide > 0)
+                        {
+                            float scaleFactor = targetSizeInMeters / maxSide;
+                            newObject.transform.localScale = Vector3.one * scaleFactor;
+                        }
 
-                    // We calculate mass based on our NEW scaled size, not the tiny original size
-                    rb.mass = targetSizeInMeters * 2f;
+                        // We add a MeshCollider to every single piece of the colorful model
+                        foreach (Renderer r in renderers)
+                        {
+                            MeshCollider collider = r.gameObject.AddComponent<MeshCollider>();
+                            collider.convex = true;
+                        }
 
-                    Debug.Log($"Success! Downloaded, Centered, Scaled, and spawned: {shapeName}");
+                        // Add the Rigidbody to the main parent so the whole thing falls together
+                        Rigidbody rb = newObject.AddComponent<Rigidbody>();
+                        rb.mass = targetSizeInMeters * 2f;
+
+                        Debug.Log($"Success! Downloaded with original colors, Scaled, and spawned: {shapeName}");
+                    }
+                    else
+                    {
+                        Debug.LogError("GLTFast failed to instantiate the visual scene.");
+                        SpawnFallback(shapeName);
+                    }
                 }
                 else
                 {
-                    Debug.LogError("Failed to extract raw mesh from the downloaded file.");
+                    Debug.LogError("Failed to load GLTF binary data.");
                     SpawnFallback(shapeName);
                 }
             }

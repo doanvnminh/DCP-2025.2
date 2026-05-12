@@ -6,6 +6,7 @@ public class AppManager : MonoBehaviour
 
     [Header("Connected Systems")]
     public ObjectSpawner spawner;
+    public AvatarController avatarController;
     public WikiAPI wikiApi;
 
     [Header("Testing UI")]
@@ -37,10 +38,11 @@ public class AppManager : MonoBehaviour
         }
     }
 
-    public void ProcessVoiceCommand(string rawText)
+    public void ProcessVoiceCommand(string rawText, string aiMaterial = "")
     {
         string command = rawText.ToLower().Trim('.', ',', '!', '?', ' ');
-        Debug.Log("AppManager understood: " + command);
+
+        Debug.Log($"[AppManager] Understood: {command} | AI Material: {aiMaterial.ToUpper()}");
 
         // Detect the INTENT of the sentence
         bool wantsToSpawn = IsFuzzyMatch(command, "spawn") || IsFuzzyMatch(command, "create") || IsFuzzyMatch(command, "make");
@@ -83,6 +85,7 @@ public class AppManager : MonoBehaviour
             {
                 wikiApi.SearchWikipedia(searchTerm, (summaryText) =>
                 {
+                    avatarController.AnswerQuestion(searchTerm);
                     Debug.Log($"[WIKIPEDIA SUMMARY] {summaryText}");
                 });
             }

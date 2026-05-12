@@ -3516,7 +3516,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c774d83cf4f4d45e29298522e8ba4923, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  whisper: {fileID: 587639199}
+  serverTranscribeUrl: https://sloppily-fondling-judicial.ngrok-free.dev/transcribe
   microphoneRecord: {fileID: 1337591123}
   streamSegments: 1
   printLanguage: 1
@@ -3639,7 +3639,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 967652833}
   m_HandleRect: {fileID: 967652832}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -4984,7 +4984,6 @@ MonoBehaviour:
   cylinderPrefab: {fileID: 5549752973909607352, guid: 60d023fe3feb7aa40bec02660f49e8c0, type: 3}
   spawnPoint: {fileID: 450749497}
   polyPizzaApiKey: 7a0eada40c71432dad36492fe925a19e
-  defaultMaterial: {fileID: 8940816193097895441, guid: b11e1f9fb1bded8478372851afa171a5, type: 3}
 --- !u!114 &1828600389
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4998,6 +4997,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AppManager
   spawner: {fileID: 1828600388}
+  avatarController: {fileID: 7870303191589330712}
   wikiApi: {fileID: 1828600391}
   textInputField: {fileID: 781124226}
 --- !u!4 &1828600390

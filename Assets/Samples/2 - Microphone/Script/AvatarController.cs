@@ -73,6 +73,18 @@ public class AvatarController : MonoBehaviour
         if (!isPlaying) StartCoroutine(PlayAudioQueue());
     }
 
+    public void AnswerQuestion(string topic)
+    {
+        // Stop any current talking/downloading if the user interrupts with a new question
+        StopAllCoroutines();
+        audioQueue.Clear();
+        isDownloading = false;
+        isPlaying = false;
+
+        // Start the new search
+        StartCoroutine(FetchWikipediaSummary(topic));
+    }
+
     // --- THE SMART CHUNKING ALGORITHM ---
     private List<string> SmartChunkText(string rawText, int targetCharLength)
     {
