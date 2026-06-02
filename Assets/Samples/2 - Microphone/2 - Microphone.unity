@@ -1350,6 +1350,7 @@ GameObject:
   - component: {fileID: 637716612}
   - component: {fileID: 637716611}
   - component: {fileID: 637716614}
+  - component: {fileID: 637716615}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1475,6 +1476,18 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &637716615
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 637716610}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 564d9966769903a49ac2b5992a49a6b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraShake
 --- !u!1 &717641470
 GameObject:
   m_ObjectHideFlags: 0
@@ -4791,8 +4804,8 @@ Transform:
   m_GameObject: {fileID: 1721093170}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -1.5467, y: -0, z: 4.0828}
+  m_LocalScale: {x: 2.4337468, y: 1, z: 2.2655666}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -4984,6 +4997,24 @@ MonoBehaviour:
   cylinderPrefab: {fileID: 5549752973909607352, guid: 60d023fe3feb7aa40bec02660f49e8c0, type: 3}
   spawnPoint: {fileID: 450749497}
   polyPizzaApiKey: 7a0eada40c71432dad36492fe925a19e
+  colabServerBaseURL: https://sloppily-fondling-judicial.ngrok-free.dev
+  maxSpawnSizeMeters: 4
+  minSpawnSizeMeters: 0.15
+  materialSounds:
+  - material: stone
+    clip: {fileID: 8300000, guid: bcab7f0cb950fae46b7ae50747fa6054, type: 3}
+  - material: fabric
+    clip: {fileID: 8300000, guid: 580dee47e79df3b459ec888016264c08, type: 3}
+  - material: plastic
+    clip: {fileID: 8300000, guid: ab727a5ceca268446be5817d84686c7c, type: 3}
+  - material: metal
+    clip: {fileID: 8300000, guid: c40b05771e77b5845aaf0f103ea3ffc7, type: 3}
+  - material: flesh
+    clip: {fileID: 8300000, guid: ae0ed7690a7aec045b2aac2add90aa24, type: 3}
+  - material: wood
+    clip: {fileID: 8300000, guid: 03e199ae7265a67438372eb219cca574, type: 3}
+  - material: fur
+    clip: {fileID: 8300000, guid: 580dee47e79df3b459ec888016264c08, type: 3}
 --- !u!114 &1828600389
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5501,43 +5532,43 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1868260179866449443, guid: 1167b3c535bc69548842e87e658dcbc8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.47937572
+      value: 2.574
       objectReference: {fileID: 0}
     - target: {fileID: 1868260179866449443, guid: 1167b3c535bc69548842e87e658dcbc8, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.00000011920929
+      value: 6.071
       objectReference: {fileID: 0}
     - target: {fileID: 1868260179866449443, guid: 1167b3c535bc69548842e87e658dcbc8, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.3400967
+      value: -7.599
       objectReference: {fileID: 0}
     - target: {fileID: 1868260179866449443, guid: 1167b3c535bc69548842e87e658dcbc8, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0
+      value: 0.04279861
       objectReference: {fileID: 0}
     - target: {fileID: 1868260179866449443, guid: 1167b3c535bc69548842e87e658dcbc8, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: 0.0075242263
       objectReference: {fileID: 0}
     - target: {fileID: 1868260179866449443, guid: 1167b3c535bc69548842e87e658dcbc8, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 1
+      value: 0.8508107
       objectReference: {fileID: 0}
     - target: {fileID: 1868260179866449443, guid: 1167b3c535bc69548842e87e658dcbc8, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: 0.5236724
       objectReference: {fileID: 0}
     - target: {fileID: 1868260179866449443, guid: 1167b3c535bc69548842e87e658dcbc8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
+      value: -62.93
       objectReference: {fileID: 0}
     - target: {fileID: 1868260179866449443, guid: 1167b3c535bc69548842e87e658dcbc8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 180
+      value: 169.785
       objectReference: {fileID: 0}
     - target: {fileID: 1868260179866449443, guid: 1167b3c535bc69548842e87e658dcbc8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 7.275
       objectReference: {fileID: 0}
     - target: {fileID: 3427238963723137624, guid: 1167b3c535bc69548842e87e658dcbc8, type: 3}
       propertyPath: Loop
@@ -5582,9 +5613,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AvatarController
   avatarAudioSource: {fileID: 7870303191589330711}
+  vrmInstance: {fileID: 7870303191589330716}
   localServerURL: https://sloppily-fondling-judicial.ngrok-free.dev/generate
   wikipediaTopic: Dog
   testSpeakNow: 0
+--- !u!114 &7870303191589330716 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 588479813771865519, guid: 1167b3c535bc69548842e87e658dcbc8, type: 3}
+  m_PrefabInstance: {fileID: 7870303191589330709}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7870303191589330710}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfba4ccd3f854e64f868ce83553071a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: VRM10::UniVRM10.Vrm10Instance
 --- !u!1 &8013500140757378755
 GameObject:
   m_ObjectHideFlags: 0

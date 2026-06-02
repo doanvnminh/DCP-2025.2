@@ -85,8 +85,8 @@ public class AppManager : MonoBehaviour
             {
                 wikiApi.SearchWikipedia(searchTerm, (summaryText) =>
                 {
-                    avatarController.AnswerQuestion(searchTerm);
                     Debug.Log($"[WIKIPEDIA SUMMARY] {summaryText}");
+                    avatarController.ProcessAndSpeak(summaryText);
                 });
             }
             else
@@ -96,9 +96,24 @@ public class AppManager : MonoBehaviour
         }
         else
         {
-            // Fallback
-            if (command.Contains("cube")) spawner.SpawnShape("cube");
-            else Debug.Log("Command not recognized by the AppManager.");
+            // ── Noun-only input (no instruction keyword) ─────────────────────────
+            // e.g. "cat", "Eiffel Tower", "black hole"
+            // → spawn the 3D model AND have the avatar explain it via Wikipedia.
+            string noun = command.Trim();
+            bool looksLikeNoun = !string.IsNullOrEmpty(noun)
+                && noun.Split(' ').Length <= 4   // short phrase, not a full sentence
+                && !noun.Contains("?");
+
+            if (looksLikeNoun)
+            {
+                Debug.Log($"[AppManager] Noun-only input: '{noun}' → spawning model + Wikipedia summary");
+                spawner.SpawnShape(noun);
+                avatarController.AnswerQuestion(noun);
+            }
+            else
+            {
+                Debug.Log("Command not recognized by the AppManager.");
+            }
         }
     }
 

@@ -3,11 +3,16 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
+using UniVRM10;
 
 public class AvatarController : MonoBehaviour
 {
     [Header("Component Setup")]
     public AudioSource avatarAudioSource;
+
+    [Header("VRM Expressions")]
+    [Tooltip("Drag the JohnCennaReal GameObject (the one with Vrm10Instance) here.")]
+    public Vrm10Instance vrmInstance;
 
     [Header("Local Python Server")]
     public string localServerURL = "https://sloppily-fondling-judicial.ngrok-free.dev/generate";
@@ -20,17 +25,102 @@ public class AvatarController : MonoBehaviour
     private Queue<AudioClip> audioQueue = new Queue<AudioClip>();
     private bool isDownloading = false;
     private bool isPlaying = false;
+    private bool isSpeaking = false;
+    private Transform _lookTarget; // eyes follow this transform
 
     // --- JSON CLASSES ---
     [System.Serializable] public class WikipediaResponse { public string extract; }
     [System.Serializable] public class LocalTTSRequest { public string text; }
 
+    void Start()
+    {
+        // Create a hidden transform the VRM eyes will follow for look-around
+        _lookTarget = new GameObject("VRM_LookTarget").transform;
+        if (vrmInstance != null)
+            vrmInstance.LookAtTarget = _lookTarget;
+
+        StartCoroutine(IdleAnimationLoop());
+    }
+
     void Update()
     {
-        if (testSpeakNow)
+        if (testSpeakNow) 
         {
             testSpeakNow = false;
             StartCoroutine(FetchWikipediaSummary(wikipediaTopic));
+        }
+    }
+
+    // ── VRM Expression helpers ────────────────────────────────────────────────
+    private void SetSpeakingExpression()
+    {
+        if (vrmInstance == null || vrmInstance.Runtime == null) return;
+        var expr = vrmInstance.Runtime.Expression;
+        // Use relaxed instead of happy — relaxed opens the mouth without squinting/closing the eyes
+        expr.SetWeight(ExpressionKey.CreateFromPreset(ExpressionPreset.relaxed),  1.0f);
+        expr.SetWeight(ExpressionKey.CreateFromPreset(ExpressionPreset.happy),    0.0f);
+        expr.SetWeight(ExpressionKey.CreateFromPreset(ExpressionPreset.neutral),  0.0f);
+    }
+
+    private void SetIdleExpression()
+    {
+        if (vrmInstance == null || vrmInstance.Runtime == null) return;
+        var expr = vrmInstance.Runtime.Expression;
+        expr.SetWeight(ExpressionKey.CreateFromPreset(ExpressionPreset.relaxed),  0.0f);
+        expr.SetWeight(ExpressionKey.CreateFromPreset(ExpressionPreset.happy),    0.0f);
+        expr.SetWeight(ExpressionKey.CreateFromPreset(ExpressionPreset.neutral),  1.0f);
+    }
+
+    // Idle loop: blink (expressions) + look-around (LookAt target, bone-driven)
+    // VRoid models use bone-based LookAt — expression weights for lookLeft/Right/Up/Down do nothing.
+
+    private IEnumerator IdleAnimationLoop()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(Random.Range(3f, 6f));
+
+            if (vrmInstance == null || vrmInstance.Runtime == null) continue;
+
+            var expr = vrmInstance.Runtime.Expression;
+
+            // Blink — only when idle; skip during speech so eyes stay open
+            if (!isSpeaking)
+            {
+                var blinkKey = ExpressionKey.CreateFromPreset(ExpressionPreset.blink);
+                expr.SetWeight(blinkKey, 1.0f);
+                yield return new WaitForSeconds(0.12f);
+                expr.SetWeight(blinkKey, 0.0f);
+            }
+
+            // Look-around only when idle — move the LookAt target (bone-driven eyes)
+            if (!isSpeaking && _lookTarget != null)
+            {
+                yield return new WaitForSeconds(0.3f);
+
+                // Build offsets relative to the model's facing direction
+                Transform root = vrmInstance.transform;
+                Vector3 eyeCenter = root.position + root.up * 1.6f + root.forward * 3f;
+
+                // Four glance positions
+                Vector3[] targets =
+                {
+                    eyeCenter + root.right  *  1.5f,          // right
+                    eyeCenter - root.right  *  1.5f,          // left
+                    eyeCenter + root.up     *  0.8f,          // up
+                    eyeCenter - root.up     *  0.5f,          // down
+                };
+
+                Vector3 chosen = targets[Random.Range(0, targets.Length)];
+                float holdTime = Random.Range(0.8f, 1.6f);
+
+                _lookTarget.position = chosen;
+
+                yield return new WaitForSeconds(holdTime);
+
+                // Return to centre-forward
+                _lookTarget.position = eyeCenter;
+            }
         }
     }
 
@@ -237,6 +327,8 @@ public class AvatarController : MonoBehaviour
 
                 avatarAudioSource.clip = nextClip;
                 avatarAudioSource.Play();
+                isSpeaking = true;
+                SetSpeakingExpression();
 
                 Debug.Log($"[CONSUMER] Playing audio clip. Length: {nextClip.length:F1} seconds. ({audioQueue.Count} left in queue)");
 
@@ -253,6 +345,8 @@ public class AvatarController : MonoBehaviour
             }
         }
 
+        isSpeaking = false;
+        SetIdleExpression();
         isPlaying = false;
         Debug.Log("[CONSUMER] Queue is empty and finished playing.");
     }
