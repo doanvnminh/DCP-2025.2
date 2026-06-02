@@ -1,12 +1,16 @@
 using UnityEngine;
-
+using TMPro;
 public class AppManager : MonoBehaviour
 {
     public static AppManager Instance;
 
     [Header("Connected Systems")]
     public ObjectSpawner spawner;
+    public AvatarController avatarController;
     public WikiAPI wikiApi;
+
+    [Header("Testing UI")]
+    public TMP_InputField textInputField;
 
     private void Awake()
     {
@@ -14,33 +18,52 @@ public class AppManager : MonoBehaviour
         else Destroy(gameObject);
     }
 
-    public void ProcessVoiceCommand(string rawText)
+    private void Start()
     {
-        // Here we will process the raw text from the transcription and determine what to do with it.
-        // For example, if the user says "Spawn a red cube", we want to tell the spawner to create a red cube in the scene.
-        // If the user says "Search Wikipedia for cats", we want to tell the wikiApi to search for cats and return some information.
+        if (textInputField != null)
+        {
+            textInputField.onSubmit.AddListener(OnTextInputSubmit);
+        }
+    }
+
+    public void OnTextInputSubmit(string typedText)
+    {
+        if (!string.IsNullOrWhiteSpace(typedText))
+        {
+            Debug.Log($"[TEXT INPUT] Sent: {typedText}");
+            ProcessVoiceCommand(typedText); // Send it to the exact same logic the voice uses!
+
+            textInputField.text = ""; 
+            textInputField.ActivateInputField(); 
+        }
+    }
+
+    public void ProcessVoiceCommand(string rawText, string aiMaterial = "")
+    {
         string command = rawText.ToLower().Trim('.', ',', '!', '?', ' ');
-        Debug.Log("AppManager understood: " + command);
-        //Keyword spotted
-        bool wantsToSpawn = IsFuzzyMatch(command,"spawn") || IsFuzzyMatch(command,"create") || IsFuzzyMatch(command, "make");
+
+        Debug.Log($"[AppManager] Understood: {command} | AI Material: {aiMaterial.ToUpper()}");
+
+        // Detect the INTENT of the sentence
+        bool wantsToSpawn = IsFuzzyMatch(command, "spawn") || IsFuzzyMatch(command, "create") || IsFuzzyMatch(command, "make");
         bool wantsToSearch = IsFuzzyMatch(command, "search") || IsFuzzyMatch(command, "what is") || IsFuzzyMatch(command, "who is");
-
-
-        
 
         if (wantsToSpawn)
         {
-            if (IsFuzzyMatch(command, "cube") || IsFuzzyMatch(command, "box"))
+            // Clean up the sentence to isolate the noun
+            // e.g., "spawn a chair" becomes "chair"
+            string targetShape = command
+                .Replace("spawn", "")
+                .Replace("create", "")
+                .Replace("make", "")
+                .Replace(" a ", " ")
+                .Replace(" an ", " ")
+                .Trim();
+
+            if (!string.IsNullOrEmpty(targetShape))
             {
-                spawner.SpawnShape("cube");
-            }
-            else if (IsFuzzyMatch(command, "sphere") || IsFuzzyMatch(command, "ball"))
-            {
-                spawner.SpawnShape("sphere");
-            }
-            else if (IsFuzzyMatch(command, "cylinder"))
-            {
-                spawner.SpawnShape("cylinder");
+                // Send the isolated noun to the gatekeeper
+                spawner.SpawnShape(targetShape);
             }
             else
             {
@@ -62,8 +85,8 @@ public class AppManager : MonoBehaviour
             {
                 wikiApi.SearchWikipedia(searchTerm, (summaryText) =>
                 {
-                    // This code runs a split second later when the internet request finishes!
                     Debug.Log($"[WIKIPEDIA SUMMARY] {summaryText}");
+                    avatarController.ProcessAndSpeak(summaryText);
                 });
             }
             else
@@ -73,26 +96,40 @@ public class AppManager : MonoBehaviour
         }
         else
         {
-            // Fallback: If  didn't say "spawn", but DID say a shape name, 
-            if (command.Contains("cube")) spawner.SpawnShape("cube");
-            else Debug.Log("Command not recognized by the AppManager.");
+            // ── Noun-only input (no instruction keyword) ─────────────────────────
+            // e.g. "cat", "Eiffel Tower", "black hole"
+            // → spawn the 3D model AND have the avatar explain it via Wikipedia.
+            string noun = command.Trim();
+            bool looksLikeNoun = !string.IsNullOrEmpty(noun)
+                && noun.Split(' ').Length <= 4   // short phrase, not a full sentence
+                && !noun.Contains("?");
+
+            if (looksLikeNoun)
+            {
+                Debug.Log($"[AppManager] Noun-only input: '{noun}' → spawning model + Wikipedia summary");
+                spawner.SpawnShape(noun);
+                avatarController.AnswerQuestion(noun);
+            }
+            else
+            {
+                Debug.Log("Command not recognized by the AppManager.");
+            }
         }
     }
 
+    // --- Keep your existing IsFuzzyMatch and LevenshteinDistance functions down here! ---
     private bool IsFuzzyMatch(string whisperStr, string targetStr, int maxStep = -1)
     {
-  
-       if (whisperStr.Contains(targetStr)) return true;
+        if (whisperStr.Contains(targetStr)) return true;
 
         string[] spokenWords = whisperStr.Split(' ', ',', '.', '!', '?');
 
-    
         int allowedTypos = maxStep;
-        if (allowedTypos == -1) // If we didn't manually set a number
+        if (allowedTypos == -1)
         {
-            if (targetStr.Length <= 4) allowedTypos = 1;      // cube, box
-            else if (targetStr.Length <= 7) allowedTypos = 2; //  sphere, create
-            else allowedTypos = 3;                            //  cylinder
+            if (targetStr.Length <= 4) allowedTypos = 1;
+            else if (targetStr.Length <= 7) allowedTypos = 2;
+            else allowedTypos = 3;
         }
 
         foreach (string word in spokenWords)
@@ -129,7 +166,4 @@ public class AppManager : MonoBehaviour
         }
         return matrix[source.Length, target.Length];
     }
-
-
 }
-
